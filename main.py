@@ -1,31 +1,28 @@
 #!/usr/bin/env python3
-"""Entry point for the news-image-20261120 submission.
+"""Place the finished front page where the grader reads it.
 
-Copies the pre-rendered front page (entry.png, produced by draw.py) into
-the grader's output directory. Standard library only, no network, no
-side effects beyond the single copy. The output is byte-identical to
-entry.png on every run.
+The picture itself is rendered ahead of time by draw.py and kept in this
+repository as entry.png. This program only drops a copy of that file at
+the grader's output path, using the standard library and no network.
+Two runs produce the same bytes both times.
 """
 
-import os
-import shutil
-import sys
+from pathlib import Path
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+SRC = Path(__file__).resolve().parent / "entry.png"
 
 
-def main():
-    src = os.path.join(HERE, "entry.png")
-    if not os.path.isfile(src):
-        sys.stderr.write("entry.png missing; run draw.py first\n")
-        return 1
-    out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR", "/output")
-    os.makedirs(out_dir, exist_ok=True)
-    dst = os.path.join(out_dir, "entry.png")
-    shutil.copyfile(src, dst)
-    print("copied entry.png to", dst)
-    return 0
+def run():
+    import os
+    if SRC.is_file():
+        dest = Path(os.environ.get("MAKEFUN_OUTPUT_DIR", "/output"))
+        dest.mkdir(parents=True, exist_ok=True)
+        out = dest / "entry.png"
+        out.write_bytes(SRC.read_bytes())
+        print("wrote", out)
+        return 0
+    print("entry.png is missing; generate it with draw.py first")
+    return 1
 
 
-if __name__ == "__main__":
-    raise SystemExit(main())
+if __name__ == "__main__": raise SystemExit(run())

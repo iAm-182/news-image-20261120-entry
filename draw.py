@@ -13,14 +13,15 @@ ellipses, text). No external images, no network access, no AI generation.
 The output is deterministic: two runs write byte-identical files.
 """
 
-import os
+import os.path
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageFont, ImageDraw
 
-W, H = 1024, 1024
-OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "entry.png")
+W = H = 1024
+_HERE = os.path.dirname(os.path.abspath(__file__))
+OUT = os.path.join(_HERE, "entry.png")
 
-# ---------------------------------------------------------------- palette
+# Colours
 PAPER = (253, 252, 246)
 INK = (18, 18, 18)
 RED = (172, 28, 28)
@@ -33,33 +34,34 @@ LAND = (236, 226, 198)
 LAND_EDGE = (176, 152, 100)
 PANEL = (244, 242, 232)
 
-FONT_DIR = "/usr/share/fonts/truetype/dejavu"
+_F = "/usr/share/fonts/truetype/dejavu"
 
 
-def font(name, size):
-    return ImageFont.truetype(os.path.join(FONT_DIR, name), size)
+def font(path, size):
+    return ImageFont.truetype(path, size)
 
 
-SERIF = "DejaVuSerif.ttf"
-SERIF_B = "DejaVuSerif-Bold.ttf"
-SANS = "DejaVuSans.ttf"
-SANS_B = "DejaVuSans-Bold.ttf"
+SERIF = _F + "/DejaVuSerif.ttf"
+SERIF_B = _F + "/DejaVuSerif-Bold.ttf"
+SANS = _F + "/DejaVuSans.ttf"
+SANS_B = _F + "/DejaVuSans-Bold.ttf"
 
 
-def wrap(d, text, fnt, width):
-    """Greedy word wrap; returns lines that fit in `width` pixels."""
-    lines, cur = [], ""
+def wrap(d, text, fnt, limit):
+    """Split `text` into lines no wider than `limit` pixels."""
+    out = []
+    line = ""
     for word in text.split():
-        trial = (cur + " " + word).strip()
-        if d.textlength(trial, font=fnt) <= width:
-            cur = trial
+        joined = (line + " " + word).strip()
+        if d.textlength(joined, font=fnt) <= limit:
+            line = joined
         else:
-            if cur:
-                lines.append(cur)
-            cur = word
-    if cur:
-        lines.append(cur)
-    return lines
+            if line:
+                out.append(line)
+            line = word
+    if line:
+        out.append(line)
+    return out
 
 
 def text_block(d, x, y, text, fnt, fill, width, leading=None):

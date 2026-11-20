@@ -17,15 +17,15 @@ Every story was verified against reports published on 20 November 2026
 invented: where a story's outcome was still pending at build time, the
 wording states only what was reported.
 
-`draw.py` generates `entry.png` (1024×1024, under 1 MiB); `main.py`
-copies it to the grader's output directory. Deterministic: two runs
+Running `draw.py` regenerates `entry.png` (1024×1024, 212 KB); `main.py`
+copies that file to the grader's output folder. Deterministic: two runs
 write identical bytes.
 
 ## Run it
 
 ```sh
-python3 draw.py          # regenerate entry.png
-mkdir -p out && MAKEFUN_OUTPUT_DIR=out python3 main.py
+python3 draw.py          # rebuild entry.png from the story data
+MAKEFUN_OUTPUT_DIR=out python3 main.py   # writes out/entry.png
 ```
 
 ---
