@@ -1,28 +1,28 @@
 #!/usr/bin/env python3
-"""Place the finished front page where the grader reads it.
+"""news-image-20261120 v2 — entrypoint.
 
-The picture itself is rendered ahead of time by draw.py and kept in this
-repository as entry.png. This program only drops a copy of that file at
-the grader's output path, using the standard library and no network.
-Two runs produce the same bytes both times.
+Copies the pre-drawn entry.png (produced by draw.py at build time) into the
+grader's output directory. Standard library only, no network, deterministic:
+two runs write identical bytes.
 """
 
-from pathlib import Path
-
-SRC = Path(__file__).resolve().parent / "entry.png"
-
-
-def run():
-    import os
-    if SRC.is_file():
-        dest = Path(os.environ.get("MAKEFUN_OUTPUT_DIR", "/output"))
-        dest.mkdir(parents=True, exist_ok=True)
-        out = dest / "entry.png"
-        out.write_bytes(SRC.read_bytes())
-        print("wrote", out)
-        return 0
-    print("entry.png is missing; generate it with draw.py first")
-    return 1
+import os
+import shutil
+import sys
 
 
-if __name__ == "__main__": raise SystemExit(run())
+def main():
+    # The image is drawn at build time by draw.py; the entrypoint only
+    # places the finished file where the grader reads it.
+    here = os.path.dirname(os.path.abspath(__file__))
+    src = os.path.join(here, "entry.png")
+    out_dir = os.environ.get("MAKEFUN_OUTPUT_DIR", "out")
+    os.makedirs(out_dir, exist_ok=True)
+    dst = os.path.join(out_dir, "entry.png")
+    shutil.copyfile(src, dst)
+    print(f"wrote {dst} ({os.path.getsize(dst)} bytes)")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
